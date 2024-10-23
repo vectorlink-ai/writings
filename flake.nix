@@ -13,6 +13,11 @@
           buildInputs = [
             nodePackages.prettier
             gnuplot
+            (python3.withPackages (ps: with ps; [
+              numpy
+              pandas
+              matplotlib
+            ]))
             bitviz.packages.${system}.default
           ];
         };
