@@ -14,23 +14,23 @@ In this article we will describe a process that uses an LLM to bootstrap a train
 
 The general outline of the process is thus:
 
-* We create a vectorisation of our JSON or CSV file using templates as described [previously](./RecordMatch.md)
-* We index on a discriminating field (also described previously)
-* Create a line-index for the input JSON or CSV (we will need random access to the original records)
-* Search for a reasonable selection of true and false records so our classifier can be effectively trained
-* Annotate correct versus incorrect answers using an LLM
+- We create a vectorisation of our JSON or CSV file using templates as described [previously](./RecordMatch.md)
+- We index on a discriminating field (also described previously)
+- Create a line-index for the input JSON or CSV (we will need random access to the original records)
+- Search for a reasonable selection of true and false records so our classifier can be effectively trained
+- Annotate correct versus incorrect answers using an LLM
 
 Since the first two steps have been described in our previous article, we'll skip these steps and go into more detail concerning what is happening internally when you run this 'match-generator'.
 
 ## Finding Candidates
 
-To find good matching candidates to generate a training set presents a problem in itself. To train a classifier we need to have both positive and negative examples, and though it is not always the case for all use-cases, in record matching it is *almost always* the case that positive solutions are much less likely than negative solutions. There are just a lot more ways to not be a matching record than to be a matching record.
+To find good matching candidates to generate a training set presents a problem in itself. To train a classifier we need to have both positive and negative examples, and though it is not always the case for all use-cases, in record matching it is _almost always_ the case that positive solutions are much less likely than negative solutions. There are just a lot more ways to not be a matching record than to be a matching record.
 
-This means we have to pare the space down from the get go to *candidate* matches which we can then add to our curated set. The first step here is to choose our discriminating field. This field gives us a single indexed distance measure over a field or aggregate of fields from our records. In our case we choose the aggregate template `record` which includes every field in our template. While this measure is not the best for discriminating match records by itself, it is very good for finding candidates.
+This means we have to pare the space down from the get go to _candidate_ matches which we can then add to our curated set. The first step here is to choose our discriminating field. This field gives us a single indexed distance measure over a field or aggregate of fields from our records. In our case we choose the aggregate template `record` which includes every field in our template. While this measure is not the best for discriminating match records by itself, it is very good for finding candidates.
 
 This measure alone, however, is insufficient. We want to have a relatively balanced set of positive versus negative examples to feed to our LLM to discriminate. How can we find something that probably matches versus something that probably doesn't match before we know?
 
-As it turns out, distances in our index tend to see large changes when we transition from areas of matches to areas which do not match. There is in essence a sort of *cliff* which we fall of in distance when we stop matching. With aggregate template measures, those in which we take multiple fields for a single matchin, we will see several of these cliffs corresponding to one of the fields failing to match.
+As it turns out, distances in our index tend to see large changes when we transition from areas of matches to areas which do not match. There is in essence a sort of _cliff_ which we fall of in distance when we stop matching. With aggregate template measures, those in which we take multiple fields for a single matchin, we will see several of these cliffs corresponding to one of the fields failing to match.
 
 We can find these cliffs by looking at a sample from the index. We do this by selecting the k-nearest-neighbors of a random selection of the database, and then collecting their distances and sorting them. These sorted distances look as follows:
 
@@ -51,14 +51,10 @@ We now have a queue of candidates that have likely matches for which we will cho
 ```md
 # k-nearest neighbours (with k of 5) with threshold of 0.12
 
-  match                    non-match
-  candidate     pivot      candidate
-    |            |           |
-[ 0.001, 0.002, 0.11, 0.3, 0.55]
+match non-match candidate pivot candidate | | | [ 0.001, 0.002, 0.11, 0.3, 0.55]
 ```
 
 Now we ask the LLM for a determination - first we look up the records corresponding with this filter field, both the centre for the k-nearest search and the result id which yielded that distance from the centre. Then we prompt the LLM to give its answer on the match status.
-
 
 ```md
 **USER**
@@ -69,17 +65,18 @@ Tell me whether the following two records are referring to the same publication 
 
 2. "T2: a customizable parallel database for multi-dimensional data","Chialin Chang, Anurag Acharya, Alan Sussman, Joel Saltz","ACM SIGMOD Record ",1998
 
-
 **ChatGPT 4o**
 
 ### Chain of Reasoning:
 
 1. **Title Comparison:**
+
    - Record 1: "T2: A Customizable Parallel Database for Multi-Dimensional Data"
    - Record 2: "T2: a customizable parallel database for multi-dimensional data"
    - The difference here is just capitalization. The core title text is the same, making this a match.
 
 2. **Authors Comparison:**
+
    - Record 1 authors: "Alan Sussman, Anurag Acharya, Joel H. Saltz, Chialin Chang"
    - Record 2 authors: "Chialin Chang, Anurag Acharya, Alan Sussman, Joel Saltz"
    - The names are exactly the same, but the order of authors differs slightly:
@@ -88,6 +85,7 @@ Tell me whether the following two records are referring to the same publication 
    - Scientific publications often include small variations in name order or formatting (like the missing middle initial), but the individuals match, indicating that both refer to the same set of authors.
 
 3. **Journal Comparison:**
+
    - Record 1: "SIGMOD Record"
    - Record 2: "ACM SIGMOD Record"
    - "ACM SIGMOD Record" is the formal and full name of the journal abbreviated as "SIGMOD Record." These clearly refer to the same journal.
