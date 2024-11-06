@@ -1,4 +1,4 @@
-# The Future of Work in Data Management
+# How to survive the AI revolution in Data Management
 
 At [VectorLink.ai](https://vectorlink.ai) we have been performing experiments with LLMs with the aim of automating or improving various data management processes. Specifically we've had a lot of success with improving outcomes for difficult record matching problems (see: [LLMs and machine learning for record matching](https://vectorlink.ai/blog/leveraging-llms-and-machine-learning-for-record-matching/), [LLM Classifier Bootstrapping](https://vectorlink.ai/blog/llm-classifier-bootstrapping/), [Entity Resolution across human languages](https://vectorlink.ai/blog/ai-entity-resolution-bridging-records/)).
 
