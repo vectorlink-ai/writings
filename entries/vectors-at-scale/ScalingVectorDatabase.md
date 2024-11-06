@@ -28,10 +28,14 @@ Imagine that N is 1 billion and M is 100. We have to search something on the ord
 
 ## Spatial Sharding
 
-Luckily, there is another approach to sharding which we can take: _spatial sharding_. Essentially this technique attempts to partition the space by using a small index. These partitions are then used to create the individual shards. In some ways it is similar to [product quantization](https://en.wikipedia.org/wiki/Vector_quantization) which attempts to reduce information content by reducing the search space into buckets. But here we are bucking vectors into a shard based on how close they are to some selection.
+Luckily, there is another approach to sharding which we can take: _spatial sharding_. Essentially this technique attempts to partition the space by using a small index.
 
 This approach is unfortunately a bit more complicated. Somehow we have to decide how to partition the space, and how to balance the partitions. But as we'll see at the end, there is a big potential pay-off. Let's see what such a scheme would look like.
 
-First, we will create a small random sample from our complete dataset. We then index this sample. We are going to use this index to partition our results.
+We can shard our vectors by using a small set of centroids: one centroid for each shard. We can obtain these centroids such that we get a balanced sharding in the following way.
 
-We will search for the nearest vector in the final layer of our index.
+First, we take a random selection from the entire dataset. Statistically this set should be representative of the general distribution in the space. We can take, perhaps 5000 vectors. We then choose the number of shards we can call this number k, in this case lets say it is 100. Finally we run a k-means clustering on the 5000 vectors, which should yield 100 centroids which evenly divide the space. This approach gives us approxmiate virnoi cells, which should be balanced partitions of the space.
+
+When we decide where to place our vectors, we now only need to compare our vector against 100 centroids. We can choose the centroid closest as our shard. We may also need to put ourselves in other shards as well if we are _relatively_ close to them. This requires a heuristic which we will evaluate later, but we can perhaps choose other centroids if they are within 10% of the closest centroid distance. This later "doubling up" in our sharding is important for clustering approaches since we will need to have some "bridging" vectors which allow us to find links across virnoi cells for regions which span borders.
+
+## Image of virnoi cells
