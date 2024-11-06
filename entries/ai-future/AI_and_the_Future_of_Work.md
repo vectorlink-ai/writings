@@ -2,7 +2,7 @@
 
 At [VectorLink.ai](https://vectorlink.ai) we have been performing experiments with LLMs with the aim of automating or improving various data management processes. Specifically we've had a lot of success with improving outcomes for difficult record matching problems (see: [LLMs and machine learning for record matching](https://vectorlink.ai/blog/leveraging-llms-and-machine-learning-for-record-matching/), [LLM Classifier Bootstrapping](https://vectorlink.ai/blog/llm-classifier-bootstrapping/), [Entity Resolution across human languages](https://vectorlink.ai/blog/ai-entity-resolution-bridging-records/)).
 
-The use of vector embeddings and the language capabilties of LLMs have openned up a huge range of new potential applications, many of which would have been complete science fiction only 10 years ago.
+The use of vector embeddings and the language capabilities of LLMs have opened up a huge range of new potential applications, many of which would have been complete science fiction only 10 years ago.
 
 This is going to have profound impacts and not only in data management, but also in the nature of IT employment, and society more generally. Profound change is profoundly disruptive, and since luck favours the prepared, we would do well to have a bit of a think about the kinds of changes that will happen. There will be big opportunities, but also grave dangers for companies that do not adapt.
 
@@ -10,7 +10,7 @@ So what are these changes and how can businesses be prepared for the disruption?
 
 In many cases, automation will be time saving. But some jobs are already vanishing as a result of AI. In the translation industry we are already seeing a profound impact. AI is so good at translation that translation has largely been reduced to the task of post-editing, something which was already present! The translators themselves are not really needed.
 
-In our own [experiments](https://vectorlink.ai/blog/llm-classifier-bootstrapping/) we have found that generative AI can be very effective at generating training sets by annotation, much in the way that a human would do. In this experiment I wasn't able to do better than the AI unless I used auxilliary information from the internet (something which will be possible to add to the AI's arsenal!). The machine is ready to replace me in this thankless task (thank goodness!).
+In our own [experiments](https://vectorlink.ai/blog/llm-classifier-bootstrapping/) we have found that generative AI can be very effective at generating training sets by annotation, much in the way that a human would do. In this experiment I wasn't able to do better than the AI unless I used auxiliary information from the internet (something which will be possible to add to the AI's arsenal!). The machine is ready to replace me in this thankless task (thank goodness!).
 
 And the price? It was approximately \$2 per hour. It will be hard to find a human who can do it at that price point. This is a major challenge to services like Mechanical Turk (ironically named for a famous [fake automation](https://en.wikipedia.org/wiki/Mechanical_Turk) which can now be automated). And the price point has been falling very quickly. Just over the last year we saw the price of embeddings fall by a factor of 10 (literally!).
 
@@ -22,7 +22,7 @@ The new automation threatens to be different than in the past because it is no l
 
 For companies this means success will require a serious automation strategy. A study produced by the now Nobel Prize winning economics researcher Daron Acemoglu showed that [firms which adopt robots win](https://news.mit.edu/2020/robots-help-firms-workers-struggle-0505). Overall the total labour displacement in manufacturing was three humans for every one robot adopted. But those companies which employed robots grew their workforce and market share and their competitors were essentially crushed.
 
-Now that robots can do cognitive labour the same process will play out in all sorts of data management tasks. Those that can identify cognitive automation potential and are fastest at adopting them will win and grow, and those who do not will be made quickly unviable.
+Now that robots can do cognitive labour the same process will play out in all sorts of data management tasks. Those that can identify cognitive automation potential and are fastest at adopting them will win and grow, and those who do not will be made quickly non-viable.
 
 Were is this likely to happen first? Well manual tagging and taxonomy and manual data transformation are all likely to be replaced with automated processes. Discoverability engineering will be a task undertaken by AIs which produce high quality indexes which employ extremely easy to use natural language interfaces. The identification of which entities (people, corporations, products) are associated with data will be identified and curated by an AI.
 
