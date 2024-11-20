@@ -14,7 +14,7 @@ Essentially we have to rewarm the age old database technique for scaling: [shard
 
 ## Random Sharding
 
-The most common technique for sharding vector databases uses _random shards_. This breaks-off random portions of the data-set and indexes each of these shards independently. The technique is widely applied, and many vector databases make use of random sharding for scaling up. This choice is often a good one due to the simplicity of the approach, the relative ease in balancing shard size, and the fact that it will scale reasonably well.
+One technique for sharding databases is to use _random shards_. This breaks-off random portions of the data-set and indexes each of these shards independently. The technique is widely applied, and some vector databases make use of random sharding for scaling up. This choice is often a good one due to the simplicity of the approach, the relative ease in balancing shard size, and the fact that it will scale reasonably well.
 
 However, it is not without down-sides. Random sharding removes one of the most interesting features that graph-based approximate nearest neighbour (ANN) indexes, which include the popular [HNSW](https://arxiv.org/abs/1603.09320) and [CAGRA](https://arxiv.org/abs/2308.15136), are able to give to us. Namely, the ability to very quickly look at approximate-nearest neighbours. Approximate-nearest-neighbour search over indexed vectors is extremely fast in an ANN graph. By contrast there is a significant overhead in searching one of these ANNs.
 
@@ -28,14 +28,14 @@ Imagine that N is 1 billion and M is 100. We have to search something on the ord
 
 ## Spatial Sharding
 
-Luckily, there is another approach to sharding which we can take: _spatial sharding_. Essentially this technique attempts to partition the space by using a small index.
+Luckily, there is another approach to sharding which we can take: _spatial sharding_. Essentially this technique attempts to partition the space by using a small index. Inverted File ([IVF](https://www.pinecone.io/learn/series/faiss/vector-indexes/)) indexes, such as used in Faiss are related to this approach, but not precisely identical - for our problem we are not only concerned with finding a given query vector, but clustering and so we need to _index_ slightly differently.
 
-This approach is unfortunately a bit more complicated. Somehow we have to decide how to partition the space, and how to balance the partitions. But as we'll see at the end, there is a big potential pay-off. Let's see what such a scheme would look like.
+This approach is a bit more complicated than random sharding. Somehow we have to decide how to partition the space, and how to balance the partitions. But as we'll see at the end, there is a big potential pay-off. Let's see what such a scheme would look like.
 
 We can shard our vectors by using a small set of centroids: one centroid for each shard. We can obtain these centroids such that we get a balanced sharding in the following way.
 
-First, we take a random selection from the entire dataset. Statistically this set should be representative of the general distribution in the space. We can take, perhaps 5000 vectors. We then choose the number of shards we can call this number k, in this case lets say it is 100. Finally we run a k-means clustering on the 5000 vectors, which should yield 100 centroids which evenly divide the space. This approach gives us approxmiate virnoi cells, which should be balanced partitions of the space.
+First, we take a random selection from the entire dataset. Statistically this set should be representative of the general distribution in the space. We can take, perhaps 5000 vectors. We then choose the number of shards we can call this number k, in this case lets say it is 100. Finally we run a k-means clustering on the 5000 vectors, which should yield 100 centroids which evenly divide the space. This approach gives us approxmiate voronoi cells, which should be balanced partitions of the space.
 
-When we decide where to place our vectors, we now only need to compare our vector against 100 centroids. We can choose the centroid closest as our shard. We may also need to put ourselves in other shards as well if we are _relatively_ close to them. This requires a heuristic which we will evaluate later, but we can perhaps choose other centroids if they are within 10% of the closest centroid distance. This later "doubling up" in our sharding is important for clustering approaches since we will need to have some "bridging" vectors which allow us to find links across virnoi cells for regions which span borders.
+When we decide where to place our vectors, we now only need to compare our vector against 100 centroids. We can choose the centroid closest as our shard. We may also need to put ourselves in other shards as well if we are _relatively_ close to them. This requires a heuristic which we will evaluate later, but we can perhaps choose other centroids if they are within 10% of the closest centroid distance. This later "doubling up" in our sharding is important for clustering approaches since we will need to have some "bridging" vectors which allow us to find links across voronoi cells for regions which span borders. It is also what distinguishes this technique from IVF.
 
-## Image of virnoi cells
+## Image of voronoi cells
