@@ -41,7 +41,6 @@ The attractiveness of the Data Mesh philosophy is that the problems of the monol
 At VectorLink, we have tried to compile a list of aspects of the externalised approach that we have encountered which are somewhat awkward in our work. The list of course is not at all exhaustive and some of the gaps may be partially filled but with tools that we find awkward or brittle, or are completely filled but we don't know about it yet (please tell us if they are!). The list is really to give a sort of indication of how we could close the distance so that dataware houses can become less desirable. We will go into detail on each of these subsequently.
 
 - Transactions
-- Incrementality
 - Provenance
 - Schema
 - Graphs
@@ -49,12 +48,42 @@ At VectorLink, we have tried to compile a list of aspects of the externalised ap
 
 ## Transactions
 
+If you have a straight through pipeline processing some time quanta of work that produces a report at the end, then often times you can just feed everything forward through a series of transformations and that is that.
+
+However, it is often the case that we would like to keep a record perhaps of some entity, in which we want to perform mutations.
+
+This leads us to a problem when more than one process wants to change more than one data resource in a way that is _consistent_. A classic example is a bank account withdraw which is deposited in another bank. If we withdraw the money, we need to be sure that the right amount of money is there, and that if we deposit it in the other account, it no longer remains in the original account for any amount of time at all (lest it be double spent).
+
+RDMBSs are fantastic at maintaining this sort of thing by giving us ACID properties. Every operation feels logically like it is taking place in isolation, so there is no need to worry about how the various operations interact.
+
+However, if we are to externalise this, we need an external transaction manager. And this is not completely untrod ground. Two notable examples are Seata and DTM, both opensource transaction managers used in anger by real systems.
+
+DTM is well thought out and provides several paradigms for transactions including two-phase, try-confirm-cancel, and SAGA among others. Yet, DTM is not looking particularly healthy, the last commit was 6mo ago and it failed some CI/CD health checks.
+
+Seata is looking more healthy with active development, but it is also in the Apache incubator stage and looks fairly rough around the edges.
+
+Many of these transaction managers also require that local operations are already ACID. This means that there is also a need here for technologies that provide local properties.
+
+From our survey it seems there is still room for something with a nice developer experience that can live in a cross-language environment.
+
 ## Incrementality
+
+Incrementality is critical to many data pipelines. You may get periodic updates of information, such as current pricing information etc. which needs to be utilised in your
 
 ## Provenance
 
 ## Schema
 
 ## Graphs
+
+The Graph Database world has quite a number of players, but Neo4j now stands as the most well known among them. Another notable example however is TigerGraph which was deigned from the off to scale up, and so is much better for extremely large projects than Neo4j.
+
+But these examples are both monoliths. They have all of the same drawbacks that RDBMSs have, so is there a way to break the graph for parts?
+
+Some of the challenges of graph database relate to the problem of how to shard the data, and how to perform queries after sharding. These problems could actually become easier if they are part of the data pipeline and externalised. Individual shards could potentially be processed separately if certain constraints are known to hold.
+
+And the problem of query over graphs can't be easily settled by some automatic procedure. Graph segmentation is a hard problem, and highly connected parts of the graph living on different computational blocks is a nightmare for efficiency.
+
+Because of this there is a lot of potential for improvement.
 
 ## Vectors
