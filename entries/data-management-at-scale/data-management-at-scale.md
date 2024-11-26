@@ -1,5 +1,7 @@
 # Externalisation: The Future of Data Management @ Scale
 
+![image](./images/database_inside_out.png)
+
 Just as data management has become more pervasive, so has scale become pervasive. Data management is never completely straightforward, but data management at large scales presents us with certain additional unique challenges. Luckily, practitioners have been chipping away at these problems for a while and we have a quite of tools and techniques to help.
 
 In the area of OLAP (OnLine Analytic Processing) this has given rise to a stack of solutions for data pipelining. The Apache stack, which includes Parquet, Arrow, DataFusion among other elements, enables us to use cloud storage to manage our data resources. These objects can be queried as though they were a database, using well trodden query languages such as SQL or more fluent styles directly in code.
@@ -13,6 +15,8 @@ The difference between the two becomes somewhat murky with the introduction of d
 In all of these systems, whether to assist in ETL for Data Warehouses, or to enable derived assets in Data Lakes, we can make use of Data Orchaestration tools. Since these pipelines are often large and complex, it's helpful to have a high level _dashboard_ view of the pipelines which can centralise reporting and progress monitoring, as well as ensure reproducability and documentation of process. Popular examples of these tools include Airflow, Dagster and Prefect.
 
 ## The Monolith
+
+![image](./images/Utah_Monolith.jpg)
 
 The data warehouse faces a lot of fundamental problems at scale. Centralisation of data quality and data format requires large central teams and reduces agility. New data assets are hard to encorporate, data quality problems which are noticed by operational teams often take a long time to work into the ETL process, and the shape of data may not be the most useful or natural for those trying to utilise the assets. In short, the centralisation of governance has overheads in time, resources and quality.
 
