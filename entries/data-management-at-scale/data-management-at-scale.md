@@ -125,6 +125,8 @@ All over these probems with monolithic design are readily and easily solved thro
 
 And yet this role is not filled effectively yet by any of the vector databases we have explored. While it is certainly possible to use vector databases in special purpose ways along the data pipeline, it has the same feel as using a postgres database as a data asset. It is not necessarily a bad idea, but it isn't really playing the role natively.
 
+![image](./images/data_pipeline.png)
+
 Currently we are building a data pipeline stack using Dagster, Apache Arrow, Apache Datafusion and some custom tooling to expose vector database indices in a way that will hopefully play nicely in this environment as a proof of concept.
 
 ## Conclusion
