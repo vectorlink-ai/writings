@@ -69,6 +69,8 @@ From our survey it seems there is still a fair bit of room for tools with a nice
 
 ## Schema
 
+![image](./images/Booch-diagram.png)
+
 Designing data such that it can be reported and manipulated conveniently is a surprisingly difficult problem in practice. With extremely simple examples it is possible to fool oneself into a view of data as a few simple tables with simple joins as being sufficient.
 
 But data which captures important content is really quite complex. All sorts of things can be captured which may have utility.
