@@ -34,14 +34,15 @@ We could probably also include the previously mentioned idea of a Data Lakehouse
 
 We are coining the term _externalisation_ to talk about the general process of trying to achieve the same sorts of benefits we see from centralisation in something like a RDBMS, Vector DB, or Graph DB, but with these more diffuse data lakes. This is achieved by exposing specific operations, libraries and tools which can give flexibility to the mechanism of discovery, distribution and data orchaestration and which achieves some of the guarantees or simplicity which the monolith provides.
 
+Externalisation is an aspect of Data Mesh, Data Fabrics, Lake Houses and other approaches to big data analytics and processing. It does not encompass these techniques, as it is more on the technical side of things, but it "meshes" as it were, with these philosophies well, essentially because it tries to empower data decentralisation while retaining the positive qualities associated with data centralisation.
+
 ## Gaps in Externalisation
 
-The attractiveness of the Data Mesh philosophy is that the problems of the monolith at scale are real. But there are still gaps in being able to provide an effective distributed environment.
+The attractiveness of the Data Mesh philosophy derives from the simple fact: the problems of the monolith at scale are real. Yet there are still serious gaps in being able to provide an effective distributed environment which can replace the monolith.
 
-At VectorLink, we have tried to compile a list of aspects of the externalised approach that we have encountered which are somewhat awkward in our work. The list of course is not at all exhaustive and some of the gaps may be partially filled but with tools that we find awkward or brittle, or are completely filled but we don't know about it yet (please tell us if they are!). The list is really to give a sort of indication of how we could close the distance so that dataware houses can become less desirable. We will go into detail on each of these subsequently.
+At VectorLink, we have been compiling a list of aspects of the externalised approach that we have encountered which are somewhat awkward in our work. The list of course is not at all exhaustive and some of the gaps may be partially filled but with tools that we find awkward or brittle, or are completely filled but we don't know about it yet (please tell us if they are!). The list is really to give a sort of indication of how we could close the distance so that dataware houses can become less desirable. We will go into detail on each of these subsequently.
 
 - Transactions
-- Provenance
 - Schema
 - Graphs
 - Vectors
@@ -60,19 +61,29 @@ However, if we are to externalise this, we need an external transaction manager.
 
 DTM is well thought out and provides several paradigms for transactions including two-phase, try-confirm-cancel, and SAGA among others. Yet, DTM is not looking particularly healthy, the last commit was 6mo ago and it failed some CI/CD health checks.
 
-Seata is looking more healthy with active development, but it is also in the Apache incubator stage and looks fairly rough around the edges.
+Seata is looking significantly more healthy with active development, but it is also in the Apache incubator stage. We can expect some maturation to occur.
 
-Many of these transaction managers also require that local operations are already ACID. This means that there is also a need here for technologies that provide local properties.
+It should also be pointed out that these external transaction managers often require that local operations are already ACID. This means that there is also a need here for technologies that provide local properties. Here it is worth mentioning Lance, a database technology also built on the DataFusion infrastructure which helps to provide such guarantees by using multiversion concurrency control, but which exists in the datafusion ecosystem as a table provider.
 
-From our survey it seems there is still room for something with a nice developer experience that can live in a cross-language environment.
-
-## Incrementality
-
-Incrementality is critical to many data pipelines. You may get periodic updates of information, such as current pricing information etc. which needs to be utilised in your
-
-## Provenance
+From our survey it seems there is still a fair bit of room for tools with a nice developer experience.
 
 ## Schema
+
+Designing data such that it can be reported and manipulated conveniently is a surprisingly difficult problem in practice. With extremely simple examples it is possible to fool oneself into a view of data as a few simple tables with simple joins as being sufficient.
+
+But data which captures important content is really quite complex. All sorts of things can be captured which may have utility.
+
+1. Data atom quality: There is a question of the range of acceptable data which might be difficult to capture in a data type. A phone number is not just a string, a temperature has a meaningful lower limit etc. The data size and storage can be impacted here, the computational time required to process. It can also be understood as a data quality issue, capturing semantically meaningiful data correctly.
+
+2. Provenance: The provenance of information which can often impact analyses later on in that some sources are more trustworthy than others or some sources have intrinsic biases which are simply different.
+
+3. Time: The time associated with data is often more than one thing. Last maintenance of a data is different than the date contained in data, or the date at which something happened. Often times more than one type of date needs to be associated for later analysis. When did a transaction occur? Was the record altered after being retrieved because of some data quality issue and when?
+
+4. Uncertainty: Uncertainty is pervasive in practical data sets. You may also have derived data which makes use of probabilistic methods which require stamping confidence levels on atomic data.
+
+How do we achieve these aims will also keeping our externalised database approach? We've found the tools here to be wanting.
+
+In an ideal world a schema system for externalisation would be a library of data descriptions which one could import and compose much the way programme code is imported and composed. It would be versioned by design, would utilise a package manager, and would allow integration into data pipelines in such a way that it could provide an overlay checking layer, and discovery layer which could inform both humans and code how to process the information in the pipeline and give early warnings when schema definitions were not symmetric with expectations, saving large scale pipeline runs.
 
 ## Graphs
 
@@ -82,8 +93,40 @@ But these examples are both monoliths. They have all of the same drawbacks that 
 
 Some of the challenges of graph database relate to the problem of how to shard the data, and how to perform queries after sharding. These problems could actually become easier if they are part of the data pipeline and externalised. Individual shards could potentially be processed separately if certain constraints are known to hold.
 
-And the problem of query over graphs can't be easily settled by some automatic procedure. Graph segmentation is a hard problem, and highly connected parts of the graph living on different computational blocks is a nightmare for efficiency.
+The problem of query over graphs can't be easily settled by an automatic procedure which works for all problems. Graph segmentation is a hard problem, and highly connected parts of the graph living on different computational blocks is a nightmare for efficiency. For large scales, it will generally be better to know something about the problem in order to obtain high performance.
 
-Because of this there is a lot of potential for improvement.
+But even without sharding, it would be convenient to have graphs coexist naturally with other tabular data in a convenient way. This is possible within an environment such as Apache Datafusion, using a table provider, but it seems there has been little activity in this direction.
+
+Integration would actually not be
+
+Graph databases have not been effectively.
 
 ## Vectors
+
+![image](./images/vector_trend.png)
+
+Vector databases have gone from rare to ubiquitous in an extremely short time. And vector databases suffer accutely from the same problems of monolithic design that have the other databases, although in this case with perhaps even less justification.
+
+The value obtained from monolithic design is less likely to be of value for vectors. For semantic indexing and search, taxonomic disovery, clustering, record matching, various RAG (Retrieval Augmented Generation) strategies, and the other aspects which LLMs shine at, transactional behaviour is of lower importance than in, say, a bank account balance.
+
+The data which is fed to vectorisation requires preprocessing to provide effective input. An example is the name field from a database. An LLM can cope very well with a mixed name using title, first name, middle name or initial and surname as a composite, giving a high quality semantic match over a name. Similar things are true of the address, and yet in a database these tend to be stored as separate fields. In addition prompting will also come into play. Often just labelling a field with its semantic content can improve match characteristics. In this way data preparation will involve steps which create composites from templates to produce input to an LLM. And this step wants to be part of a data-pipeline which is hooked into the vectorisation process.
+
+Then there is the problem of balancing vector processing. LLM vectorisation of source data is an [embarassingly parallel](https://en.wikipedia.org/wiki/Embarrassingly_parallel) problem. Yet it is not easy to get a database to control the process of spinning up a fleet of vectorisers. In addition, not spinning up a fleet could be extremely time consuming, even to the point of infeasibility when scales exceed around 100 million.
+
+After vectorisation you have vectors that can be of value in direct comparisons between records even without an index. This comes in handy when trying to produce high quality record matches after you have already obtained candidates. This suggests that the vectors should be easily accessible to other analytics code that can make use of them. So cloud storage is to be prefered over a special purpose database or a database service which holds the vectors.
+
+Creating an index over high dimensional vectors is a difficult prospect and is still a very active field of experimentation. The problem lends strongly towards probabilistic solutions, which are currently dominating the landscape in vector indices. These probabilistic methods tend to sacrifice recall for speed. This is especially true as the scale of vectors increases.
+
+This can be mitigated by various multi-indexing approaches, and many of these involve creating a sharding strategy where we search multiple shards for potential matches. Controlling sharding strategy then becomes very important and something which should fit nicely into ones pipelines.
+
+In the case of _clustering_, that is, attempting to find groups of matching vectors, we have an even more difficult problem. Here sharding can militate against effective clustering unless careful sharding choices are made.
+
+All over these probems with monolithic design are readily and easily solved through a process of externalisation. What we need is less of a vector database and more of a toolkit of vector processing stages treated much the way we treat other data assets and query in our analytic data pipelines.
+
+And yet this role is not filled effectively yet by any of the vector databases we have explored. While it is certainly possible to use vector databases in special purpose ways along the data pipeline, it has the same feel as using a postgres database as a data asset. It is not necessarily a bad idea, but it isn't really playing the role natively.
+
+Currently we are building a data pipeline stack using Dagster, Apache Arrow, Apache Datafusion and some custom tooling to expose vector database indices in a way that will hopefully play nicely in this environment as a proof of concept.
+
+## Conclusion
+
+As we move more and more towards cloud based, big scale and concurrent solutions, we will find ourselves increasingly up against the problems imposed by the monolith. Overcoming the inconveniences and filling the gaps will be both frustrating and fruitful, but it will be necessary for a significant swath of applications. We are looking forward to experimenting with and overcoming some of these problems ourselves and will keep abreast of developments in this area so we can be at the forefront of explorations on data @ scale.
